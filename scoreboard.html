@@ -128,7 +128,7 @@
                         <tr>
                             <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hole</th>
                             <!-- プレイヤー名ヘッダーはJavaScriptで更新されます -->
-                            <!-- ここは動的に生成されるので、HTMLには空のままにしておきます -->
+                            <!-- ここはJavaScriptで動的に生成されるので、HTMLには空のままにしておきます -->
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
@@ -429,7 +429,7 @@
 
             // 初期スコアデータ構造
             let scores = {
-                playerNames: [],
+                playerNames: [], // このページでは使用しないが、互換性のため残す
                 holeScores: Array(NUM_HOLES).fill(null).map(() => Array(MAX_PLAYERS).fill('')) // 最大プレイヤー数で初期化
             };
 
@@ -465,6 +465,7 @@
                 if (storedScores) {
                     scores = JSON.parse(storedScores);
                     // holeScoresのデータ構造が古い場合や不完全な場合の対策
+                    // ただし、playerNamesはsetup.htmlから読み込むので、scores.playerNamesは使用しない
                     if (!scores.holeScores || scores.holeScores.length !== NUM_HOLES || scores.holeScores[0].length !== MAX_PLAYERS) {
                         scores.holeScores = Array(NUM_HOLES).fill(null).map(() => Array(MAX_PLAYERS).fill(''));
                     }
@@ -491,10 +492,9 @@
              * スコアデータ、メダル点数データをLocalStorageに保存する
              */
             function saveData() {
-                // プレイヤー名はsetup.htmlで管理されるため、ここではスコアと点数のみ保存
+                // プレイヤー人数と名前はsetup.htmlで管理されるため、ここではスコアと点数のみ保存
                 localStorage.setItem(LOCAL_STORAGE_KEY_SCORES, JSON.stringify(scores));
                 localStorage.setItem(LOCAL_STORAGE_KEY_POINTS, JSON.stringify(currentMedalPoints));
-                // currentPlayerCountとplayerNamesはsetup.htmlで保存されたものを利用
             }
 
             /**
@@ -514,7 +514,7 @@
              * スコア入力テーブルを生成・更新する
              */
             function generateScoreTable() {
-                scoreTableBody.innerHTML = ''; // 一度クリア
+                scoreTableBody.innerHTML = ''; // テーブルボディをクリア
 
                 // ヘッダー行をクリアして再生成
                 scoreTableHeaderRow.innerHTML = '<th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hole</th>';
@@ -667,19 +667,17 @@
             }
 
             /**
-             * 全てのスコアとプレイヤー名をリセットする
+             * 全てのスコアをリセットする
              */
             async function resetScores() {
                 const confirmed = await showConfirmModal('全てのスコアをリセットしますか？この操作は元に戻せません。');
                 if (confirmed) {
                     localStorage.removeItem(LOCAL_STORAGE_KEY_SCORES);
-                    // プレイヤー人数と名前はsetup.htmlでリセットされるため、ここではスコアのみ
+                    // プレイヤー人数と名前はsetup.htmlで管理されるため、ここではスコアのみリセット
                     scores.holeScores = Array(NUM_HOLES).fill(null).map(() => Array(MAX_PLAYERS).fill(''));
                     
-                    generateScoreTable();
-                    updateResults();
-                    // 設定モーダルも最新の状態に
-                    populateSettingsModal();
+                    generateScoreTable(); // UIをクリア
+                    updateResults(); // 結果をクリア
                 }
             }
 
