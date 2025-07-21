@@ -2,73 +2,1109 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>ゴルフスコアボード</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>スコア入力 - ゴルフ オリンピック スコアボード</title>
+    <!-- Tailwind CSS CDNを読み込みます。これにより、モダンなデザインを素早く適用できます。 -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        table {
-            border-collapse: collapse;
-            width: 100%;
+        /* Interフォントを適用 */
+        body {
+            font-family: 'Inter', sans-serif;
         }
-        th, td {
-            border: 1px solid #333;
-            padding: 8px;
+        /* カスタムスタイル */
+        .score-table-container {
+            max-height: 60vh; /* テーブルの高さを制限し、スクロール可能にする */
+            overflow-y: auto; /* 縦スクロールを有効にする */
+            -webkit-overflow-scrolling: touch; /* iOSでのスムーズなスクロール */
+        }
+        /* stickyヘッダーのためのスタイル */
+        .score-table thead th {
+            position: sticky;
+            top: 0;
+            background-color: #f3f4f6; /* ヘッダーの背景色 */
+            z-index: 10; /* 他の要素の上に表示 */
+        }
+        /* プラスの差分は緑色 */
+        .positive-diff {
+            color: #28a745;
+            font-weight: bold;
+        }
+        /* マイナスの差分は赤色 */
+        .negative-diff {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        /* ゼロの差分は灰色 */
+        .zero-diff {
+            color: #6c757d;
+        }
+
+        /* モーダルオーバーレイのスタイル */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+            max-width: 90%;
+            max-height: 90%;
+            overflow-y: auto;
+            transform: translateY(-20px);
+            transition: transform 0.3s ease;
+        }
+        .modal-overlay.show .modal-content {
+            transform: translateY(0);
+        }
+        /* モーダル内のボタン */
+        .modal-button {
+            @apply bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-200 ease-in-out;
+        }
+        .modal-button.clear {
+            @apply bg-gray-400 hover:bg-gray-500;
+        }
+        .modal-button.cancel {
+            @apply bg-red-500 hover:bg-red-600;
+        }
+        .modal-button.save {
+            @apply bg-green-500 hover:bg-green-600;
+        }
+
+        /* カスタム確認モーダルのスタイル */
+        #confirmModal .modal-content {
+            width: 300px; /* 小さめに設定 */
             text-align: center;
         }
-        th {
-            background: #f2f2f2;
-        }
-        .hole-header {
-            background: #e0e0e0;
-            font-weight: bold;
+
+        /* SVGアイコンのサイズ調整 */
+        .medal-icon {
+            width: 24px; /* アイコンの幅 */
+            height: 24px; /* アイコンの高さ */
+            display: block; /* 中央寄せのため */
+            margin: 0 auto; /* 中央寄せ */
         }
     </style>
 </head>
-<body>
-    <h2>スコアボード</h2>
-    <form id="scoreForm">
-        <table>
-            <thead>
-                <tr>
-                    <th class="hole-header">ホール</th>
-                    <th>プレーヤーA</th>
-                    <th>プレーヤーB</th>
-                    <th>プレーヤーC</th>
-                    <!-- 必要に応じてプレーヤー列追加 -->
-                </tr>
-            </thead>
-            <tbody>
-                <!-- 18ホール分の入力欄を生成 -->
-                <!-- プレーヤー数に合わせてカラムを増減してください -->
-                <!-- 例: 3名の場合 -->
-                <!-- 必要に応じてプレーヤー名を変更してください -->
-                <!-- JSで自動生成することも可能です -->
-                <!-- ホール番号1〜18 -->
-                <!-- 例: プレーヤーA, B, C -->
-                <!-- 各セルに type="number" のinputを設置 -->
-                <!-- ホール1 -->
-                <tr>
-                    <td class="hole-header">1</td>
-                    <td><input type="number" name="scoreA1" min="1" max="10"></td>
-                    <td><input type="number" name="scoreB1" min="1" max="10"></td>
-                    <td><input type="number" name="scoreC1" min="1" max="10"></td>
-                </tr>
-                <!-- ホール2〜18も同様に -->
-                <!-- 以下は例として一部のみ記載、実際は18行分を追加 -->
-                <tr>
-                    <td class="hole-header">2</td>
-                    <td><input type="number" name="scoreA2" min="1" max="10"></td>
-                    <td><input type="number" name="scoreB2" min="1" max="10"></td>
-                    <td><input type="number" name="scoreC2" min="1" max="10"></td>
-                </tr>
-                <!-- ... -->
-                <tr>
-                    <td class="hole-header">18</td>
-                    <td><input type="number" name="scoreA18" min="1" max="10"></td>
-                    <td><input type="number" name="scoreB18" min="1" max="10"></td>
-                    <td><input type="number" name="scoreC18" min="1" max="10"></td>
-                </tr>
-            </tbody>
-        </table>
-        <button type="submit">スコア送信</button>
-    </form>
+<body class="bg-gray-100 text-gray-800 p-4">
+    <header class="bg-blue-800 text-white p-6 rounded-lg shadow-md mb-6 text-center relative">
+        <h1 class="text-4xl font-bold mb-2">ゴルフ オリンピック スコアボード</h1>
+        <p class="text-lg opacity-90">18ホールのメダル点数を記録し、合計点数と得点差を計算します。</p>
+        <button id="settings-button" class="absolute top-4 right-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg shadow-md transition duration-300 ease-in-out text-sm">
+            設定
+        </button>
+    </header>
+
+    <main class="max-w-6xl mx-auto">
+        <section class="bg-white p-6 rounded-lg shadow-md mb-6">
+            <h2 class="text-2xl font-semibold text-blue-700 border-b-2 border-blue-200 pb-3 mb-5">現在のプレイヤー</h2>
+            <div id="current-players-display" class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                <!-- プレイヤー名はJavaScriptで動的に表示されます -->
+            </div>
+        </section>
+
+        <section class="bg-white p-6 rounded-lg shadow-md mb-6">
+            <h2 class="text-2xl font-semibold text-blue-700 border-b-2 border-blue-200 pb-3 mb-5">各ホール スコア入力</h2>
+            <p class="text-gray-600 mb-4 italic">編集したいホールとプレイヤーのセルをタップしてください。</p>
+            <div class="score-table-container border border-gray-200 rounded-md">
+                <table id="score-table" class="min-w-full divide-y divide-gray-200 score-table">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hole</th>
+                            <!-- プレイヤー名ヘッダーはJavaScriptで更新されます -->
+                            <!-- ここはJavaScriptで動的に生成されるので、HTMLには空のままにしておきます -->
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <!-- JavaScriptで18ホール分の行を生成します -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="bg-white p-6 rounded-lg shadow-md mb-6">
+            <h2 class="text-2xl font-semibold text-blue-700 border-b-2 border-blue-200 pb-3 mb-5">結果</h2>
+            <div class="overflow-x-auto">
+                <table id="results-table" class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">プレイヤー</th>
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">合計点数</th>
+                            <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">得点差</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <!-- JavaScriptで結果を生成します -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="flex justify-center mt-8 space-x-4">
+                <button id="generateLeaderboardButton"
+                        class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition duration-300 ease-in-out transform hover:scale-105">
+                    リーダーボードURL生成
+                </button>
+                <button id="endRoundButton"
+                        class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition duration-300 ease-in-out transform hover:scale-105">
+                    ラウンド終了
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <footer class="text-center text-gray-600 mt-8 p-4">
+        <p>&copy; 2025 ゴルフオリンピック スコアボード</p>
+    </footer>
+
+    <!-- SVGアイコンの定義 (display: none; で非表示) -->
+    <svg style="display: none;">
+        <symbol id="icon-chipin" viewBox="0 0 24 24">
+            <path fill="#00BCD4" d="M12 1L2 7l10 16 10-16z" stroke="#000" stroke-width="0.5"/>
+        </symbol>
+        <symbol id="icon-gold" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="8" fill="#FFD700"/>
+            <path fill="#8B4513" d="M10 4h4v2h-4zM8 20h8v2h-8z"/>
+        </symbol>
+        <symbol id="icon-silver" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="8" fill="#C0C0C0"/>
+            <path fill="#696969" d="M10 4h4v2h-4zM8 20h8v2h-8z"/>
+        </symbol>
+        <symbol id="icon-bronze" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="8" fill="#CD7F32"/>
+            <path fill="#8B4513" d="M10 4h4v2h-4zM8 20h8v2h-8z"/>
+        </symbol>
+        <symbol id="icon-iron" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="8" fill="#6C757D"/>
+            <path fill="#495057" d="M10 4h4v2h-4zM8 20h8v2h-8z"/>
+        </symbol>
+    </svg>
+
+    <!-- メダル選択モーダル -->
+    <div id="medalSelectModal" class="modal-overlay">
+        <div class="modal-content w-80">
+            <h3 id="medalSelectModalTitle" class="text-xl font-semibold mb-4 text-center">ホール ? - プレイヤー ?</h3>
+            <div class="grid grid-cols-2 gap-3">
+                <button class="modal-button flex items-center justify-center gap-2" data-medal="チップイン">
+                    <svg class="w-6 h-6"><use href="#icon-chipin"/></svg>チップイン (5点)
+                </button>
+                <button class="modal-button flex items-center justify-center gap-2" data-medal="金">
+                    <svg class="w-6 h-6"><use href="#icon-gold"/></svg>金 (4点)
+                </button>
+                <button class="modal-button flex items-center justify-center gap-2" data-medal="銀">
+                    <svg class="w-6 h-6"><use href="#icon-silver"/></svg>銀 (3点)
+                </button>
+                <button class="modal-button flex items-center justify-center gap-2" data-medal="銅">
+                    <svg class="w-6 h-6"><use href="#icon-bronze"/></svg>銅 (2点)
+                </button>
+                <button class="modal-button flex items-center justify-center gap-2" data-medal="鉄">
+                    <svg class="w-6 h-6"><use href="#icon-iron"/></svg>鉄 (1点)
+                </button>
+                <button class="modal-button clear flex items-center justify-center gap-2" data-medal="">
+                    <span class="text-gray-400 text-xl font-bold">-</span>クリア
+                </button>
+            </div>
+            <div class="flex justify-end mt-6">
+                <button id="closeMedalSelectModal" class="modal-button cancel">閉じる</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 設定モーダル -->
+    <div id="settingsModal" class="modal-overlay">
+        <div class="modal-content w-96">
+            <h3 class="text-xl font-semibold mb-4 text-center">メダル点数設定</h3>
+            <div class="grid grid-cols-1 gap-4 mb-6">
+                <div class="flex items-center">
+                    <label for="points-チップイン" class="w-1/2 font-medium">チップイン:</label>
+                    <input type="number" id="points-チップイン" class="w-1/2 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="flex items-center">
+                    <label for="points-金" class="w-1/2 font-medium">金:</label>
+                    <input type="number" id="points-金" class="w-1/2 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="flex items-center">
+                    <label for="points-銀" class="w-1/2 font-medium">銀:</label>
+                    <input type="number" id="points-銀" class="w-1/2 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="flex items-center">
+                    <label for="points-銅" class="w-1/2 font-medium">銅:</label>
+                    <input type="number" id="points-銅" class="w-1/2 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="flex items-center">
+                    <label for="points-鉄" class="w-1/2 font-medium">鉄:</label>
+                    <input type="number" id="points-鉄" class="w-1/2 p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+            </div>
+            <div class="flex justify-end gap-3">
+                <button id="saveSettings" class="modal-button save">保存</button>
+                <button id="closeSettingsModal" class="modal-button cancel">閉じる</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- リーダーボード生成モーダル -->
+    <div id="leaderboardModal" class="modal-overlay">
+        <div class="modal-content w-11/12 max-w-2xl">
+            <h3 class="text-xl font-semibold mb-4 text-center">ライブオリンピックリーダーボード</h3>
+            <p class="text-gray-700 mb-4">
+                以下のURLにアクセスすると、現在のスコア状況を閲覧できます。
+                このHTMLをダウンロードし、デプロイ先の`leaderboard.html`ファイルを更新することで、他のメンバーも最新状況を確認できます。
+                <br><strong class="text-red-600">※スコアを更新するたびに、このHTMLをダウンロードしてデプロイ先に再アップロードする必要があります。</strong>
+            </p>
+            <div class="mb-4">
+                <label for="leaderboardUrlDisplay" class="block text-sm font-medium text-gray-700">リーダーボードURL:</label>
+                <input type="text" id="leaderboardUrlDisplay" class="w-full p-2 border border-gray-300 rounded-md bg-gray-50 mt-1" readonly>
+                <button id="copyLeaderboardUrl" class="mt-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg text-sm">URLをコピー</button>
+            </div>
+            <div class="flex justify-center mb-6">
+                <div id="leaderboardQrCode" class="p-2 bg-white rounded-md shadow-inner"></div>
+            </div>
+            <p class="text-gray-700 mb-4">
+                以下のHTMLコンテンツをコピーし、`leaderboard.html`ファイルとして保存して、あなたのウェブサイトの公開ディレクトリにアップロードしてください。
+            </p>
+            <textarea id="leaderboardHtmlContent" class="w-full h-64 p-2 border border-gray-300 rounded-md font-mono text-xs bg-gray-50" readonly></textarea>
+            <button id="downloadLeaderboardHtml" class="mt-2 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg text-sm">HTMLをダウンロード</button>
+            <div class="flex justify-end mt-6">
+                <button id="closeLeaderboardModal" class="modal-button cancel">閉じる</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ラウンド終了モーダル -->
+    <div id="roundEndModal" class="modal-overlay">
+        <div class="modal-content w-11/12 max-w-2xl">
+            <h3 class="text-xl font-semibold mb-4 text-center">ラウンド終了！お疲れ様でした！</h3>
+            <p class="text-gray-700 mb-4">
+                最終スコアが確定しました。以下のURLでラウンド結果を共有できます。
+                このHTMLをダウンロードし、デプロイ先の`round_summary.html`ファイル（または`leaderboard.html`を上書き）を更新することで、このラウンドの最終記録として残せます。
+            </p>
+            <div class="mb-4">
+                <label for="roundSummaryUrlDisplay" class="block text-sm font-medium text-gray-700">ラウンド結果URL:</label>
+                <input type="text" id="roundSummaryUrlDisplay" class="w-full p-2 border border-gray-300 rounded-md bg-gray-50 mt-1" readonly>
+                <button id="copyRoundSummaryUrl" class="mt-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg text-sm">URLをコピー</button>
+            </div>
+            <div class="flex justify-center mb-6">
+                <div id="roundSummaryQrCode" class="p-2 bg-white rounded-md shadow-inner"></div>
+            </div>
+            <p class="text-gray-700 mb-4">
+                以下のHTMLコンテンツをコピーし、`round_summary.html`ファイルとして保存して、あなたのウェブサイトの公開ディレクトリにアップロードしてください。
+            </p>
+            <textarea id="roundSummaryHtmlContent" class="w-full h-64 p-2 border border-gray-300 rounded-md font-mono text-xs bg-gray-50" readonly></textarea>
+            <button id="downloadRoundSummaryHtml" class="mt-2 bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg text-sm">HTMLをダウンロード</button>
+
+            <h4 class="text-lg font-semibold mt-6 mb-3 text-center">SNSでシェア！</h4>
+            <div class="flex justify-center gap-4">
+                <a id="shareLine" href="#" target="_blank" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm3.618 13.911c-.136.082-.294.12-.452.12-.158 0-.316-.038-.452-.12-.272-.164-.452-.452-.452-.777V9.75c0-.325.18-.613.452-.777.272-.164.613-.164.885 0 .272.164.452.452.452.777v5.384c0 .325-.18.613-.452.777zM8.382 13.911c-.136.082-.294.12-.452.12-.158 0-.316-.038-.452-.12-.272-.164-.452-.452-.452-.777V9.75c0-.325.18-.613.452-.777.272-.164.613-.164.885 0 .272.164.452.452.452.777v5.384c0 .325-.18.613-.452.777z"/></svg>LINE
+                </a>
+                <a id="shareX" href="#" target="_blank" class="bg-gray-800 hover:bg-black text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.13l-6.51-8.68L5.818 21.75H2.5L10.795 12.25L2.125 2.25h3.308l5.25 6.985L18.244 2.25zm-2.91 17.567h-1.637L4.975 4.49H6.613l8.72 15.327z"/></svg>X (Twitter)
+                </a>
+                <a id="shareInstagram" href="#" target="_blank" class="bg-pink-500 hover:bg-pink-600 text-white font-bold py-2 px-4 rounded-lg flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4c0 3.2-2.6 5.8-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8C2 4.6 4.6 2 7.8 2zm-.2 2.7c-2.4 0-4.3 1.9-4.3 4.3v8.4c0 2.4 1.9 4.3 4.3 4.3h8.4c2.4 0 4.3-1.9 4.3-4.3V7.8c0-2.4-1.9-4.3-4.3-4.3H7.6zM12 7.5c-2.5 0-4.5 2-4.5 4.5s2 4.5 4.5 4.5 4.5-2 4.5-4.5-2-4.5-4.5-4.5zm0 7.3c-1.6 0-2.8-1.3-2.8-2.8s1.3-2.8 2.8-2.8 2.8 1.3 2.8 2.8-1.3 2.8-2.8 2.8zm5.7-9.1c-.5 0-.9-.4-.9-.9s.4-.9.9-.9.9.4.9.9-.4.9-.9.9z"/></svg>Instagram
+                </a>
+            </div>
+            <div class="flex justify-end mt-6">
+                <button id="closeRoundEndModal" class="modal-button cancel">閉じる</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- カスタム確認モーダル -->
+    <div id="confirmModal" class="modal-overlay">
+        <div class="modal-content">
+            <h3 class="text-xl font-semibold mb-4">確認</h3>
+            <p id="confirmMessage" class="mb-6">本当に実行しますか？</p>
+            <div class="flex justify-center gap-4">
+                <button id="confirmYes" class="modal-button save">はい</button>
+                <button id="confirmNo" class="modal-button cancel">いいえ</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- QRコード生成ライブラリ -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode.js/1.0.0/qrcode.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('DOMContentLoaded fired in scoreboard.html'); // スクリプト開始ログ
+
+            const MAX_PLAYERS = 4; // 最大プレイヤー数
+            const NUM_HOLES = 18;
+            const LOCAL_STORAGE_KEY_SCORES = 'golfOlympicScores';
+            const LOCAL_STORAGE_KEY_POINTS = 'golfOlympicMedalPoints';
+            const LOCAL_STORAGE_KEY_PLAYER_COUNT = 'golfOlympicPlayerCount';
+            const LOCAL_STORAGE_KEY_PLAYER_NAMES = 'golfOlympicPlayerNames'; // setup.htmlから読み込む
+
+            // デフォルトのメダル点数定義
+            const DEFAULT_MEDAL_POINTS = {
+                '': 0, // 未選択の場合
+                '選択してください': 0, // ドロップダウンの初期選択肢
+                'チップイン': 5,
+                '金': 4,
+                '銀': 3,
+                '銅': 2,
+                '鉄': 1
+            };
+            let currentMedalPoints = {}; // 現在のメダル点数 (動的に変更可能)
+            let currentPlayerCount = 4; // 現在のプレイヤー数 (setup.htmlから読み込む)
+            let playerNames = []; // プレイヤー名 (setup.htmlから読み込む)
+
+            // SVGアイコンのマッピング
+            const SVG_ICONS = {
+                'チップイン': `<svg class="medal-icon"><use href="#icon-chipin"/></svg>`,
+                '金': `<svg class="medal-icon"><use href="#icon-gold"/></svg>`,
+                '銀': `<svg class="medal-icon"><use href="#icon-silver"/></svg>`,
+                '銅': `<svg class="medal-icon"><use href="#icon-bronze"/></svg>`,
+                '鉄': `<svg class="medal-icon"><use href="#icon-iron"/></svg>`,
+                '': `<span class="text-gray-400">-</span>` // クリア/空の場合
+            };
+
+            // DOM要素の取得
+            const currentPlayersDisplay = document.getElementById('current-players-display');
+            const scoreTableBody = document.querySelector('#score-table tbody');
+            const scoreTableHeaderRow = document.querySelector('#score-table thead tr'); // ヘッダー行
+            const resultsTableBody = document.querySelector('#results-table tbody');
+            // HTMLに存在しないreset-buttonへの参照を削除
+            // const resetButton = document.getElementById('reset-button');
+            const settingsButton = document.getElementById('settings-button');
+            const generateLeaderboardButton = document.getElementById('generateLeaderboardButton');
+            const endRoundButton = document.getElementById('endRoundButton');
+
+            // メダル選択モーダル要素
+            const medalSelectModal = document.getElementById('medalSelectModal');
+            const medalSelectModalTitle = document.getElementById('medalSelectModalTitle');
+            const closeMedalSelectModalButton = document.getElementById('closeMedalSelectModal');
+            let currentSelectedCell = null; // 現在編集中のセルを保持
+
+            // 設定モーダル要素
+            const settingsModal = document.getElementById('settingsModal');
+            const closeSettingsModalButton = document.getElementById('closeSettingsModal');
+            const saveSettingsButton = document.getElementById('saveSettings');
+            const medalPointInputs = {};
+            Object.keys(DEFAULT_MEDAL_POINTS).forEach(medal => {
+                if (medal !== '' && medal !== '選択してください') {
+                    medalPointInputs[medal] = document.getElementById(`points-${medal}`);
+                }
+            });
+
+            // リーダーボード生成モーダル要素
+            const leaderboardModal = document.getElementById('leaderboardModal');
+            const leaderboardUrlDisplay = document.getElementById('leaderboardUrlDisplay');
+            const copyLeaderboardUrlButton = document.getElementById('copyLeaderboardUrl');
+            const leaderboardQrCodeDiv = document.getElementById('leaderboardQrCode');
+            const leaderboardHtmlContent = document.getElementById('leaderboardHtmlContent');
+            const downloadLeaderboardHtmlButton = document.getElementById('downloadLeaderboardHtml');
+            const closeLeaderboardModalButton = document.getElementById('closeLeaderboardModal');
+
+            // ラウンド終了モーダル要素
+            const roundEndModal = document.getElementById('roundEndModal');
+            const roundSummaryUrlDisplay = document.getElementById('roundSummaryUrlDisplay');
+            const copyRoundSummaryUrlButton = document.getElementById('copyRoundSummaryUrl');
+            const roundSummaryQrCodeDiv = document.getElementById('roundSummaryQrCode');
+            const roundSummaryHtmlContent = document.getElementById('roundSummaryHtmlContent');
+            const downloadRoundSummaryHtmlButton = document.getElementById('downloadRoundSummaryHtml');
+            const closeRoundEndModalButton = document.getElementById('closeRoundEndModal');
+            const shareLineButton = document.getElementById('shareLine');
+            const shareXButton = document.getElementById('shareX');
+            const shareInstagramButton = document.getElementById('shareInstagram');
+
+
+            // カスタム確認モーダル要素
+            const confirmModal = document.getElementById('confirmModal');
+            const confirmMessage = document.getElementById('confirmMessage');
+            const confirmYesButton = document.getElementById('confirmYes');
+            const confirmNoButton = document.getElementById('confirmNo');
+
+            // 初期スコアデータ構造
+            let scores = {
+                playerNames: [], // このページでは使用しないが、互換性のため残す
+                holeScores: Array(NUM_HOLES).fill(null).map(() => Array(MAX_PLAYERS).fill('')) // 最大プレイヤー数で初期化
+            };
+
+            /**
+             * LocalStorageからスコアデータ、メダル点数データ、プレイヤー人数・名前データをロードする
+             */
+            function loadData() {
+                console.log('loadData called.');
+                // プレイヤー人数データのロード
+                const storedPlayerCount = localStorage.getItem(LOCAL_STORAGE_KEY_PLAYER_COUNT);
+                if (storedPlayerCount) {
+                    currentPlayerCount = parseInt(storedPlayerCount);
+                } else {
+                    // setup.htmlから来ていない場合はデフォルト値を設定
+                    currentPlayerCount = 4;
+                }
+                console.log('currentPlayerCount after load:', currentPlayerCount);
+
+                // プレイヤー名データのロード
+                const storedPlayerNames = localStorage.getItem(LOCAL_STORAGE_KEY_PLAYER_NAMES);
+                if (storedPlayerNames) {
+                    playerNames = JSON.parse(storedPlayerNames);
+                    // プレイヤー名の数が設定人数と合わない場合の調整
+                    playerNames = playerNames.slice(0, currentPlayerCount);
+                    while (playerNames.length < currentPlayerCount) {
+                        playerNames.push(`プレイヤー${String.fromCharCode(65 + playerNames.length)}`);
+                    }
+                } else {
+                    // setup.htmlから来ていない場合はデフォルト名を生成
+                    playerNames = Array(currentPlayerCount).fill(null).map((_, i) => `プレイヤー${String.fromCharCode(65 + i)}`);
+                }
+                console.log('playerNames after load:', playerNames);
+
+                // スコアデータのロード
+                const storedScores = localStorage.getItem(LOCAL_STORAGE_KEY_SCORES);
+                if (storedScores) {
+                    scores = JSON.parse(storedScores);
+                    // holeScoresのデータ構造が古い場合や不完全な場合の対策
+                    // ただし、playerNamesはsetup.htmlから読み込むので、scores.playerNamesは使用しない
+                    if (!scores.holeScores || scores.holeScores.length !== NUM_HOLES || scores.holeScores[0].length !== MAX_PLAYERS) {
+                        scores.holeScores = Array(NUM_HOLES).fill(null).map(() => Array(MAX_PLAYERS).fill(''));
+                    }
+                } else {
+                    scores.holeScores = Array(NUM_HOLES).fill(null).map(() => Array(MAX_PLAYERS).fill(''));
+                }
+                console.log('scores after load:', scores);
+
+                // メダル点数データのロード
+                const storedPoints = localStorage.getItem(LOCAL_STORAGE_KEY_POINTS);
+                if (storedPoints) {
+                    currentMedalPoints = JSON.parse(storedPoints);
+                    // デフォルト値にない新しいメダルが追加された場合や、削除された場合の対策
+                    Object.keys(DEFAULT_MEDAL_POINTS).forEach(medal => {
+                        if (medal !== '' && medal !== '選択してください' && currentMedalPoints[medal] === undefined) {
+                            currentMedalPoints[medal] = DEFAULT_MEDAL_POINTS[medal];
+                        }
+                    });
+                } else {
+                    currentMedalPoints = { ...DEFAULT_MEDAL_POINTS }; // デフォルト値をコピー
+                }
+                console.log('currentMedalPoints after load:', currentMedalPoints);
+            }
+
+            /**
+             * スコアデータ、メダル点数データをLocalStorageに保存する
+             */
+            function saveData() {
+                // プレイヤー人数と名前はsetup.htmlで管理されるため、ここではスコアと点数のみ保存
+                localStorage.setItem(LOCAL_STORAGE_KEY_SCORES, JSON.stringify(scores));
+                localStorage.setItem(LOCAL_STORAGE_KEY_POINTS, JSON.stringify(currentMedalPoints));
+            }
+
+            /**
+             * 現在のプレイヤー名を表示する
+             */
+            function displayCurrentPlayers() {
+                console.log('displayCurrentPlayers called.');
+                currentPlayersDisplay.innerHTML = '';
+                playerNames.slice(0, currentPlayerCount).forEach(name => {
+                    const div = document.createElement('div');
+                    div.className = 'bg-blue-100 text-blue-800 p-3 rounded-md font-semibold';
+                    div.textContent = name;
+                    currentPlayersDisplay.appendChild(div);
+                });
+            }
+
+            /**
+             * スコア入力テーブルを生成・更新する
+             */
+            function generateScoreTable() {
+                console.log('generateScoreTable called. currentPlayerCount:', currentPlayerCount);
+                scoreTableBody.innerHTML = ''; // テーブルボディをクリア
+
+                // ヘッダー行をクリアして再生成
+                scoreTableHeaderRow.innerHTML = '<th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hole</th>';
+                for (let j = 0; j < currentPlayerCount; j++) { // Use currentPlayerCount for headers
+                    const th = document.createElement('th');
+                    th.className = 'player-name-header px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider';
+                    th.textContent = playerNames[j] || `プレイヤー${j + 1}`;
+                    scoreTableHeaderRow.appendChild(th);
+                }
+                console.log('Table headers generated.');
+
+                for (let i = 0; i < NUM_HOLES; i++) {
+                    const row = scoreTableBody.insertRow();
+                    row.classList.add('hover:bg-gray-50'); // ホバーエフェクト
+                    const holeCell = row.insertCell();
+                    holeCell.textContent = `Hole ${i + 1}`;
+                    holeCell.classList.add('px-3', 'py-2', 'whitespace-nowrap', 'text-sm', 'font-medium', 'text-gray-900', 'text-center');
+
+                    for (let j = 0; j < currentPlayerCount; j++) { // Use currentPlayerCount for cells
+                        const cell = row.insertCell();
+                        cell.classList.add('px-3', 'py-2', 'whitespace-nowrap', 'text-sm', 'text-gray-700', 'text-center', 'cursor-pointer', 'rounded-md', 'hover:bg-blue-100', 'transition-colors');
+                        cell.dataset.hole = i;
+                        cell.dataset.player = j;
+
+                        // ここでSVGアイコンを挿入
+                        const medalType = scores.holeScores[i][j];
+                        cell.innerHTML = SVG_ICONS[medalType] || SVG_ICONS['']; // SVGアイコンまたはハイフン
+
+                        // クリックイベントリスナーを設定
+                        cell.addEventListener('click', (event) => {
+                            currentSelectedCell = event.target; // 現在編集中のセルを保存
+                            const holeIndex = parseInt(event.target.dataset.hole);
+                            const playerIndex = parseInt(event.target.dataset.player);
+                            const playerName = playerNames[playerIndex];
+                            medalSelectModalTitle.textContent = `ホール ${holeIndex + 1} - ${playerName}`;
+                            showModal(medalSelectModal);
+                        });
+                        // 既存のメダルがあればクラスを追加して色付けなど
+                        const currentMedal = scores.holeScores[i][j];
+                        cell.classList.remove('bg-yellow-100', 'bg-amber-100', 'bg-gray-200', 'bg-orange-100', 'bg-red-100'); // 一度クリア
+                        if (currentMedal === 'チップイン') cell.classList.add('bg-yellow-100');
+                        else if (currentMedal === '金') cell.classList.add('bg-amber-100');
+                        else if (currentMedal === '銀') cell.classList.add('bg-gray-200');
+                        else if (currentMedal === '銅') cell.classList.add('bg-orange-100');
+                        else if (currentMedal === '鉄') cell.classList.add('bg-red-100');
+                    }
+                }
+                console.log('Table rows and cells generated.');
+            }
+
+            /**
+             * 結果（合計点数と得点差）を計算して表示する
+             */
+            function updateResults() {
+                console.log('updateResults called.');
+                resultsTableBody.innerHTML = ''; // 一度クリア
+
+                const playerTotals = Array(currentPlayerCount).fill(0); // 現在のプレイヤー数で配列を確保
+
+                // 各プレイヤーの合計点数を計算
+                for (let i = 0; i < NUM_HOLES; i++) {
+                    for (let j = 0; j < currentPlayerCount; j++) { // 現在のプレイヤー数でループ
+                        const medalType = scores.holeScores[i][j];
+                        playerTotals[j] += currentMedalPoints[medalType] || 0; // 現在のメダル点数を使用
+                    }
+                }
+
+                // 結果テーブルに表示
+                for (let index = 0; index < currentPlayerCount; index++) { // 現在のプレイヤー数でループ
+                    const playerName = playerNames[index];
+                    const totalScore = playerTotals[index];
+                    
+                    let difference = 0;
+                    if (currentPlayerCount > 1) {
+                        // 他のプレイヤーの点数合計を計算
+                        let otherPlayersScoreSum = 0;
+                        for (let k = 0; k < currentPlayerCount; k++) {
+                            if (k !== index) { // 本人以外のプレイヤーの点数を合計
+                                otherPlayersScoreSum += playerTotals[k];
+                            }
+                        }
+                        // 新しい計算式: (本人の点数 × (人数設定 - 1)) - (他人の点数合計)
+                        difference = (totalScore * (currentPlayerCount - 1)) - otherPlayersScoreSum;
+                    }
+
+                    const row = resultsTableBody.insertRow();
+                    row.classList.add('hover:bg-gray-50'); // ホバーエフェクト
+                    
+                    // プレイヤー名セル
+                    const nameCell = row.insertCell();
+                    nameCell.textContent = playerName;
+                    nameCell.classList.add('px-6', 'py-4', 'whitespace-nowrap', 'text-sm', 'font-medium', 'text-gray-900');
+
+                    // 合計点数セル
+                    const totalCell = row.insertCell();
+                    totalCell.textContent = totalScore;
+                    totalCell.classList.add('px-6', 'py-4', 'whitespace-nowrap', 'text-sm', 'text-gray-500', 'text-center');
+
+                    // 差分セル
+                    const diffCell = row.insertCell();
+                    diffCell.textContent = difference > 0 ? `+${difference}` : difference;
+                    diffCell.classList.add('px-6', 'py-4', 'whitespace-nowrap', 'text-sm', 'text-center');
+
+                    if (difference > 0) {
+                        diffCell.classList.add('positive-diff');
+                    } else if (difference < 0) {
+                        diffCell.classList.add('negative-diff');
+                    } else {
+                        diffCell.classList.add('zero-diff');
+                    }
+                }
+                console.log('Results table updated.');
+            }
+
+            /**
+             * モーダルを表示する
+             * @param {HTMLElement} modalElement - 表示するモーダル要素
+             */
+            function showModal(modalElement) {
+                modalElement.classList.add('show');
+            }
+
+            /**
+             * モーダルを非表示にする
+             * @param {HTMLElement} modalElement - 非表示にするモーダル要素
+             */
+            function hideModal(modalElement) {
+                modalElement.classList.remove('show');
+            }
+
+            /**
+             * カスタム確認モーダルを表示する
+             * @param {string} message - 表示するメッセージ
+             * @returns {Promise<boolean>} - ユーザーの選択 (true: はい, false: いいえ)
+             */
+            function showConfirmModal(message) {
+                return new Promise(resolve => {
+                    confirmMessage.textContent = message;
+                    showModal(confirmModal);
+
+                    const handleConfirm = (result) => {
+                        hideModal(confirmModal);
+                        confirmYesButton.removeEventListener('click', yesListener);
+                        confirmNoButton.removeEventListener('click', noListener);
+                        resolve(result);
+                    };
+
+                    const yesListener = () => handleConfirm(true);
+                    const noListener = () => handleConfirm(false);
+
+                    confirmYesButton.addEventListener('click', yesListener);
+                    confirmNoButton.addEventListener('click', noListener);
+                });
+            }
+
+            /**
+             * 全てのスコアをリセットする
+             */
+            async function resetScores() {
+                const confirmed = await showConfirmModal('全てのスコアをリセットしますか？この操作は元に戻せません。');
+                if (confirmed) {
+                    localStorage.removeItem(LOCAL_STORAGE_KEY_SCORES);
+                    // プレイヤー人数と名前はsetup.htmlで管理されるため、ここではスコアのみリセット
+                    scores.holeScores = Array(NUM_HOLES).fill(null).map(() => Array(MAX_PLAYERS).fill(''));
+                    
+                    generateScoreTable(); // UIをクリア
+                    updateResults(); // 結果をクリア
+                }
+            }
+
+            /**
+             * メダル選択モーダル内のボタンクリックハンドラ
+             */
+            medalSelectModal.querySelectorAll('.modal-button').forEach(button => {
+                button.addEventListener('click', () => {
+                    if (currentSelectedCell) {
+                        const holeIndex = parseInt(currentSelectedCell.dataset.hole);
+                        const playerIndex = parseInt(currentSelectedCell.dataset.player);
+                        const selectedMedal = button.dataset.medal;
+
+                        scores.holeScores[holeIndex][playerIndex] = selectedMedal; // メダル種別を保存
+                        currentSelectedCell.innerHTML = SVG_ICONS[selectedMedal] || SVG_ICONS['']; // SVGアイコンを挿入
+
+                        // セルの背景色をリセットしてから新しいメダルに応じて色付け
+                        currentSelectedCell.classList.remove('bg-yellow-100', 'bg-amber-100', 'bg-gray-200', 'bg-orange-100', 'bg-red-100');
+                        if (selectedMedal === 'チップイン') currentSelectedCell.classList.add('bg-yellow-100');
+                        else if (selectedMedal === '金') currentSelectedCell.classList.add('bg-amber-100');
+                        else if (selectedMedal === '銀') currentSelectedCell.classList.add('bg-gray-200');
+                        else if (selectedMedal === '銅') currentSelectedCell.classList.add('bg-orange-100');
+                        else if (selectedMedal === '鉄') currentSelectedCell.classList.add('bg-red-100');
+
+                        saveData(); // 変更があったら即座に保存
+                        updateResults(); // 結果を更新
+                        hideModal(medalSelectModal);
+                        currentSelectedCell = null; // 選択セルをクリア
+                    }
+                });
+            });
+
+            // メダル選択モーダルの閉じるボタン
+            closeMedalSelectModalButton.addEventListener('click', () => {
+                hideModal(medalSelectModal);
+                currentSelectedCell = null;
+            });
+
+            // 設定モーダルを開くボタン
+            settingsButton.addEventListener('click', () => {
+                populateSettingsModal();
+                showModal(settingsModal);
+            });
+
+            // 設定モーダルを閉じるボタン
+            closeSettingsModalButton.addEventListener('click', () => {
+                hideModal(settingsModal);
+            });
+
+            /**
+             * 設定モーダルに現在のメダル点数を表示する
+             */
+            function populateSettingsModal() {
+                Object.keys(medalPointInputs).forEach(medal => {
+                    if (medalPointInputs[medal]) {
+                        medalPointInputs[medal].value = currentMedalPoints[medal];
+                    }
+                });
+            }
+
+            // 設定を保存するボタン
+            saveSettingsButton.addEventListener('click', () => {
+                let pointsChanged = false;
+                Object.keys(medalPointInputs).forEach(medal => {
+                    if (medalPointInputs[medal]) {
+                        const newValue = parseInt(medalPointInputs[medal].value);
+                        if (!isNaN(newValue) && currentMedalPoints[medal] !== newValue) {
+                            currentMedalPoints[medal] = newValue;
+                            pointsChanged = true;
+                        }
+                    }
+                });
+
+                if (pointsChanged) {
+                    saveData(); // 点数設定を保存
+                    updateResults(); // 点数が変わったので結果を再計算
+                }
+                hideModal(settingsModal);
+            });
+
+            // リーダーボード生成ボタン
+            generateLeaderboardButton.addEventListener('click', () => {
+                generateLeaderboardHtml(false); // ライブリーダーボード生成
+                showModal(leaderboardModal);
+            });
+
+            // リーダーボードモーダルの閉じるボタン
+            closeLeaderboardModalButton.addEventListener('click', () => {
+                hideModal(leaderboardModal);
+            });
+
+            // リーダーボードURLをコピー
+            copyLeaderboardUrlButton.addEventListener('click', () => {
+                const url = leaderboardUrlDisplay.value;
+                if (url) {
+                    // navigator.clipboard.writeText(url) は iframe で動作しない可能性があるため、document.execCommand('copy') を使用
+                    const tempInput = document.createElement('input');
+                    tempInput.value = url;
+                    document.body.appendChild(tempInput);
+                    tempInput.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(tempInput);
+                    alert('URLがコピーされました！'); // カスタムモーダルにするのが理想
+                }
+            });
+
+
+            // リーダーボードHTMLをダウンロード
+            downloadLeaderboardHtmlButton.addEventListener('click', () => {
+                const htmlContent = leaderboardHtmlContent.value;
+                if (htmlContent) {
+                    const blob = new Blob([htmlContent], { type: 'text/html' });
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    a.download = 'leaderboard.html';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(a.href);
+                }
+            });
+
+
+            // ラウンド終了ボタン
+            endRoundButton.addEventListener('click', async () => {
+                const confirmed = await showConfirmModal('ラウンドを終了しますか？現在のスコアはリセットされます。');
+                if (confirmed) {
+                    generateLeaderboardHtml(true); // ラウンド終了結果生成
+                    showModal(roundEndModal);
+                    // スコアをリセット
+                    localStorage.removeItem(LOCAL_STORAGE_KEY_SCORES);
+                    scores.holeScores = Array(NUM_HOLES).fill(null).map(() => Array(MAX_PLAYERS).fill(''));
+                    generateScoreTable(); // UIをクリア
+                    updateResults(); // 結果をクリア
+                }
+            });
+
+            // ラウンド終了モーダルの閉じるボタン
+            closeRoundEndModalButton.addEventListener('click', () => {
+                hideModal(roundEndModal);
+            });
+
+            // ラウンド終了URLをコピー
+            copyRoundSummaryUrlButton.addEventListener('click', () => {
+                const url = roundSummaryUrlDisplay.value;
+                if (url) {
+                    const tempInput = document.createElement('input');
+                    tempInput.value = url;
+                    document.body.appendChild(tempInput);
+                    tempInput.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(tempInput);
+                    alert('URLがコピーされました！');
+                }
+            });
+
+            // ラウンド終了HTMLをダウンロード
+            downloadRoundSummaryHtmlButton.addEventListener('click', () => {
+                const htmlContent = roundSummaryHtmlContent.value;
+                if (htmlContent) {
+                    const blob = new Blob([htmlContent], { type: 'text/html' });
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    a.download = 'round_summary.html'; // または 'leaderboard_final.html'
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(a.href);
+                }
+            });
+
+            /**
+             * リーダーボード/ラウンドサマリーのHTMLコンテンツを生成する
+             * @param {boolean} isFinalRound - ラウンド終了時の生成かどうか
+             */
+            function generateLeaderboardHtml(isFinalRound) {
+                // 現在のページのURLからベースURLを構築
+                // 例: https://[あなたのサイトのドメイン]/scoreboard.html -> https://[あなたのサイトのドメイン]/
+                const baseUrl = window.location.origin + window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
+                
+                const leaderboardUrl = baseUrl + 'leaderboard.html';
+                const roundSummaryUrl = baseUrl + 'round_summary.html'; // 最終ラウンド用URL
+
+                const targetUrl = isFinalRound ? roundSummaryUrl : leaderboardUrl;
+                const targetQrCodeDiv = isFinalRound ? roundSummaryQrCodeDiv : leaderboardQrCodeDiv;
+                const targetUrlDisplay = isFinalRound ? roundSummaryUrlDisplay : leaderboardUrlDisplay;
+                const targetHtmlContentArea = isFinalRound ? roundSummaryHtmlContent : leaderboardHtmlContent;
+                const pageTitle = isFinalRound ? 'ゴルフ オリンピック ラウンド結果' : 'ゴルフ オリンピック ライブリーダーボード';
+                const mainTitle = isFinalRound ? 'ラウンド結果' : 'ライブリーダーボード';
+                const description = isFinalRound ? 'このラウンドの最終スコアです。' : '現在のスコア状況です。';
+
+                // 結果テーブルのHTMLを動的に生成
+                let resultsHtml = `
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">プレイヤー</th>
+                                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">合計点数</th>
+                                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">得点差</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                `;
+
+                const playerTotals = Array(currentPlayerCount).fill(0);
+                for (let i = 0; i < NUM_HOLES; i++) {
+                    for (let j = 0; j < currentPlayerCount; j++) {
+                        const medalType = scores.holeScores[i][j];
+                        playerTotals[j] += currentMedalPoints[medalType] || 0;
+                    }
+                }
+
+                for (let index = 0; index < currentPlayerCount; index++) {
+                    const playerName = playerNames[index];
+                    const totalScore = playerTotals[index];
+                    let difference = 0;
+                    if (currentPlayerCount > 1) {
+                        let otherPlayersScoreSum = 0;
+                        for (let k = 0; k < currentPlayerCount; k++) {
+                            if (k !== index) {
+                                otherPlayersScoreSum += playerTotals[k];
+                            }
+                        }
+                        difference = (totalScore * (currentPlayerCount - 1)) - otherPlayersScoreSum;
+                    }
+
+                    let diffClass = 'zero-diff';
+                    if (difference > 0) diffClass = 'positive-diff';
+                    else if (difference < 0) diffClass = 'negative-diff';
+
+                    resultsHtml += `
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${playerName}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-center">${totalScore}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-center ${diffClass}">${difference > 0 ? `+${difference}` : difference}</td>
+                            </tr>
+                    `;
+                }
+                resultsHtml += `
+                        </tbody>
+                    </table>
+                `;
+
+                // スコア入力テーブルのHTMLを動的に生成 (リーダーボードにも表示)
+                let scoreInputTableHtml = `
+                    <div class="score-table-container border border-gray-200 rounded-md">
+                        <table class="min-w-full divide-y divide-gray-200 score-table">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Hole</th>
+                `;
+                for (let j = 0; j < currentPlayerCount; j++) {
+                    scoreInputTableHtml += `<th class="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">${playerNames[j] || `プレイヤー${j + 1}`}</th>`;
+                }
+                scoreInputTableHtml += `
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                `;
+                for (let i = 0; i < NUM_HOLES; i++) {
+                    scoreInputTableHtml += `<tr><td class="px-3 py-2 whitespace-nowrap text-sm font-medium text-gray-900 text-center">Hole ${i + 1}</td>`;
+                    for (let j = 0; j < currentPlayerCount; j++) {
+                        const medalType = scores.holeScores[i][j];
+                        scoreInputTableHtml += `<td class="px-3 py-2 whitespace-nowrap text-sm text-gray-700 text-center">${SVG_ICONS[medalType] || SVG_ICONS['']}</td>`;
+                    }
+                    scoreInputTableHtml += `</tr>`;
+                }
+                scoreInputTableHtml += `
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+
+                // リーダーボードページのHTMLテンプレート
+                const generatedHtml = `<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${pageTitle}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .score-table-container { max-height: 60vh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+        .score-table thead th { position: sticky; top: 0; background-color: #f3f4f6; z-index: 10; }
+        .positive-diff { color: #28a745; font-weight: bold; }
+        .negative-diff { color: #dc3545; font-weight: bold; }
+        .zero-diff { color: #6c757d; }
+        .medal-icon { width: 24px; height: 24px; display: block; margin: 0 auto; }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 p-4">
+    <header class="bg-blue-800 text-white p-6 rounded-lg shadow-md mb-6 text-center">
+        <h1 class="text-4xl font-bold mb-2">ゴルフ オリンピック ${mainTitle}</h1>
+        <p class="text-lg opacity-90">${description}</p>
+    </header>
+
+    <main class="max-w-6xl mx-auto">
+        <section class="bg-white p-6 rounded-lg shadow-md mb-6">
+            <h2 class="text-2xl font-semibold text-blue-700 border-b-2 border-blue-200 pb-3 mb-5">現在のプレイヤー</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                ${playerNames.slice(0, currentPlayerCount).map(name => `<div class="bg-blue-100 text-blue-800 p-3 rounded-md font-semibold">${name}</div>`).join('')}
+            </div>
+        </section>
+
+        <section class="bg-white p-6 rounded-lg shadow-md mb-6">
+            <h2 class="text-2xl font-semibold text-blue-700 border-b-2 border-blue-200 pb-3 mb-5">各ホール スコア</h2>
+            ${scoreInputTableHtml}
+        </section>
+
+        <section class="bg-white p-6 rounded-lg shadow-md mb-6">
+            <h2 class="text-2xl font-semibold text-blue-700 border-b-2 border-blue-200 pb-3 mb-5">最終結果</h2>
+            <div class="overflow-x-auto">
+                ${resultsHtml}
+            </div>
+        </section>
+    </main>
+
+    <footer class="text-center text-gray-600 mt-8 p-4">
+        <p>&copy; 2025 ゴルフオリンピック スコアボード</p>
+    </footer>
+
+    <!-- SVGアイコンの定義 (表示用) -->
+    <svg style="display: none;">
+        <symbol id="icon-chipin" viewBox="0 0 24 24">
+            <path fill="#00BCD4" d="M12 1L2 7l10 16 10-16z" stroke="#000" stroke-width="0.5"/>
+        </symbol>
+        <symbol id="icon-gold" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="8" fill="#FFD700"/>
+            <path fill="#8B4513" d="M10 4h4v2h-4zM8 20h8v2h-8z"/>
+        </symbol>
+        <symbol id="icon-silver" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="8" fill="#C0C0C0"/>
+            <path fill="#696969" d="M10 4h4v2h-4zM8 20h8v2h-8z"/>
+        </symbol>
+        <symbol id="icon-bronze" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="8" fill="#CD7F32"/>
+            <path fill="#8B4513" d="M10 4h4v2h-4zM8 20h8v2h-8z"/>
+        </symbol>
+        <symbol id="icon-iron" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="8" fill="#6C757D"/>
+            <path fill="#495057" d="M10 4h4v2h-4zM8 20h8v2h-8z"/>
+        </symbol>
+    </svg>
+</body>
+</html>`;
+
+                // URLとQRコードの表示
+                targetUrlDisplay.value = targetUrl;
+                // 既存のQRコードをクリア
+                targetQrCodeDiv.innerHTML = '';
+                new QRCode(targetQrCodeDiv, {
+                    text: targetUrl,
+                    width: 128,
+                    height: 128,
+                    colorDark: "#000000",
+                    colorLight: "#ffffff",
+                    correctLevel: QRCode.CorrectLevel.H
+                });
+                targetHtmlContentArea.value = generatedHtml;
+
+                if (isFinalRound) {
+                    // SNSシェアリンクを設定
+                    const shareText = `ゴルフオリンピックのラウンド結果！\n${pageTitle}\n合計点数と得点差をチェック！\n`;
+                    const encodedUrl = encodeURIComponent(targetUrl);
+                    const encodedText = encodeURIComponent(shareText);
+
+                    shareLineButton.href = `https://social-plugins.line.me/lineit/share?url=${encodedUrl}&text=${encodedText}`;
+                    shareXButton.href = `https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodedText}`;
+                    // Instagramは直接URLシェアが難しいため、案内のみ
+                    shareInstagramButton.href = `https://www.instagram.com/share?url=${encodedUrl}`; // これはウェブ版では動作しない可能性が高い
+                    shareInstagramButton.onclick = () => {
+                        alert('Instagramは直接ウェブサイトのURLをシェアする機能が限られています。スクリーンショットを撮って投稿し、プロフィールにURLを貼ることをお勧めします。');
+                        return false;
+                    };
+                }
+            }
+
+            // イベントリスナーの登録
+            // HTMLに存在しないreset-buttonへの参照を削除しました。
+            // resetButton.addEventListener('click', resetScores);
+            settingsButton.addEventListener('click', () => {
+                populateSettingsModal();
+                showModal(settingsModal);
+            });
+            closeSettingsModalButton.addEventListener('click', () => {
+                hideModal(settingsModal);
+            });
+            saveSettingsButton.addEventListener('click', () => {
+                let pointsChanged = false;
+                Object.keys(medalPointInputs).forEach(medal => {
+                    if (medalPointInputs[medal]) {
+                        const newValue = parseInt(medalPointInputs[medal].value);
+                        if (!isNaN(newValue) && currentMedalPoints[medal] !== newValue) {
+                            currentMedalPoints[medal] = newValue;
+                            pointsChanged = true;
+                        }
+                    }
+                });
+
+                if (pointsChanged) {
+                    saveData(); // 点数設定を保存
+                    updateResults(); // 点数が変わったので結果を再計算
+                }
+                hideModal(settingsModal);
+            });
+
+            // ページの初期ロード時に実行
+            loadData(); // スコア、点数設定、プレイヤー人数・名前をロード
+            displayCurrentPlayers(); // プレイヤー名を表示
+            generateScoreTable(); // まずテーブルを生成してから
+            updateResults();     // 結果を計算・表示
+        });
+    </script>
 </body>
 </html>
