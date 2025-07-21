@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ゴルフ オリンピック ライブリーダーボード</title>
+    <!-- Tailwind CSS CDNを読み込みます -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .score-table-container { max-height: 60vh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+        .score-table thead th { position: sticky; top: 0; background-color: #f3f4f6; z-index: 10; }
+        .positive-diff { color: #28a745; font-weight: bold; }
+        .negative-diff { color: #dc3545; font-weight: bold; }
+        .zero-diff { color: #6c757d; }
+        .medal-icon { width: 24px; height: 24px; display: block; margin: 0 auto; }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 p-4">
+    <header class="bg-blue-800 text-white p-6 rounded-lg shadow-md mb-6 text-center">
+        <h1 class="text-4xl font-bold mb-2">ゴルフ オリンピック ライブリーダーボード</h1>
+        <p class="text-lg opacity-90">現在のスコア状況です。</p>
+    </header>
+
+    <main class="max-w-6xl mx-auto">
+        <section class="bg-white p-6 rounded-lg shadow-md mb-6">
+            <h2 class="text-2xl font-semibold text-blue-700 border-b-2 border-blue-200 pb-3 mb-5">現在のプレイヤー</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                <!-- プレイヤー名はscoreboard.htmlから生成されるHTMLに埋め込まれます -->
+            </div>
+        </section>
+
+        <section class="bg-white p-6 rounded-lg shadow-md mb-6">
+            <h2 class="text-2xl font-semibold text-blue-700 border-b-2 border-blue-200 pb-3 mb-5">各ホール スコア</h2>
+            <!-- スコア入力テーブルはscoreboard.htmlから生成されるHTMLに埋め込まれます -->
+        </section>
+
+        <section class="bg-white p-6 rounded-lg shadow-md mb-6">
+            <h2 class="text-2xl font-semibold text-blue-700 border-b-2 border-blue-200 pb-3 mb-5">最終結果</h2>
+            <div class="overflow-x-auto">
+                <!-- 結果テーブルはscoreboard.htmlから生成されるHTMLに埋め込まれます -->
+            </div>
+        </section>
+    </main>
+
+    <footer class="text-center text-gray-600 mt-8 p-4">
+        <p>&copy; 2025 ゴルフオリンピック スコアボード</p>
+    </footer>
+
+    <!-- SVGアイコンの定義 (表示用) -->
+    <svg style="display: none;">
+        <symbol id="icon-chipin" viewBox="0 0 24 24">
+            <path fill="#00BCD4" d="M12 1L2 7l10 16 10-16z" stroke="#000" stroke-width="0.5"/>
+        </symbol>
+        <symbol id="icon-gold" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="8" fill="#FFD700"/>
+            <path fill="#8B4513" d="M10 4h4v2h-4zM8 20h8v2h-8z"/>
+        </symbol>
+        <symbol id="icon-silver" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="8" fill="#C0C0C0"/>
+            <path fill="#696969" d="M10 4h4v2h-4zM8 20h8v2h-8z"/>
+        </symbol>
+        <symbol id="icon-bronze" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="8" fill="#CD7F32"/>
+            <path fill="#8B4513" d="M10 4h4v2h-4zM8 20h8v2h-8z"/>
+        </symbol>
+        <symbol id="icon-iron" viewBox="0 0 24 24">
+            <circle cx="12" cy="12" r="8" fill="#6C757D"/>
+            <path fill="#495057" d="M10 4h4v2h-4zM8 20h8v2h-8z"/>
+        </symbol>
+    </svg>
+</body>
+</html>

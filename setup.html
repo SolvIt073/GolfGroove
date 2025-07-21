@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>設定 - ゴルフ オリンピック スコアボード</title>
+    <!-- Tailwind CSS CDNを読み込みます -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f3f4f6;
+            color: #333;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800">
+    <main class="max-w-2xl mx-auto bg-white p-8 rounded-lg shadow-xl w-full">
+        <h1 class="text-3xl font-bold text-blue-800 mb-6 text-center">ラウンド設定</h1>
+
+        <section class="mb-8">
+            <h2 class="text-2xl font-semibold text-blue-700 border-b-2 border-blue-200 pb-3 mb-5">プレイヤー人数設定</h2>
+            <div class="flex justify-center gap-6 mb-5">
+                <label class="inline-flex items-center cursor-pointer">
+                    <input type="radio" name="player-count" value="2" class="form-radio h-5 w-5 text-blue-600">
+                    <span class="ml-2 text-lg font-medium">2人</span>
+                </label>
+                <label class="inline-flex items-center cursor-pointer">
+                    <input type="radio" name="player-count" value="3" class="form-radio h-5 w-5 text-blue-600">
+                    <span class="ml-2 text-lg font-medium">3人</span>
+                </label>
+                <label class="inline-flex items-center cursor-pointer">
+                    <input type="radio" name="player-count" value="4" class="form-radio h-5 w-5 text-blue-600" checked>
+                    <span class="ml-2 text-lg font-medium">4人</span>
+                </label>
+            </div>
+        </section>
+
+        <section class="mb-8">
+            <h2 class="text-2xl font-semibold text-blue-700 border-b-2 border-blue-200 pb-3 mb-5">プレイヤー名設定</h2>
+            <div id="player-name-inputs-container" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-5">
+                <!-- プレイヤー名入力フィールドはJavaScriptで動的に表示/非表示されます -->
+                <div class="flex flex-col player-input-wrapper" data-player-id="0">
+                    <label for="player1-name" class="mb-1 font-medium">プレイヤー1:</label>
+                    <input type="text" id="player1-name" placeholder="プレイヤーA" value="プレイヤーA"
+                           class="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="flex flex-col player-input-wrapper" data-player-id="1">
+                    <label for="player2-name" class="mb-1 font-medium">プレイヤー2:</label>
+                    <input type="text" id="player2-name" placeholder="プレイヤーB" value="プレイヤーB"
+                           class="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="flex flex-col player-input-wrapper" data-player-id="2">
+                    <label for="player3-name" class="mb-1 font-medium">プレイヤー3:</label>
+                    <input type="text" id="player3-name" placeholder="プレイヤーC" value="プレイヤーC"
+                           class="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="flex flex-col player-input-wrapper" data-player-id="3">
+                    <label for="player4-name" class="mb-1 font-medium">プレイヤー4:</label>
+                    <input type="text" id="player4-name" placeholder="プレイヤーD" value="プレイヤーD"
+                           class="p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+            </div>
+        </section>
+
+        <div class="flex justify-center mt-8">
+            <button id="startGameButton"
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg text-xl transition duration-300 ease-in-out transform hover:scale-105">
+                入力開始
+            </button>
+        </div>
+    </main>
+
+    <footer class="mt-10 text-gray-600 text-sm">
+        <p>&copy; 2025 ゴルフオリンピック スコアボード</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const MAX_PLAYERS = 4;
+            const LOCAL_STORAGE_KEY_PLAYER_COUNT = 'golfOlympicPlayerCount';
+            const LOCAL_STORAGE_KEY_PLAYER_NAMES = 'golfOlympicPlayerNames'; // プレイヤー名専用のキー
+
+            const playerCountRadios = document.querySelectorAll('input[name="player-count"]');
+            const playerInputs = [];
+            for (let i = 1; i <= MAX_PLAYERS; i++) {
+                playerInputs.push(document.getElementById(`player${i}-name`));
+            }
+            const playerInputWrappers = document.querySelectorAll('.player-input-wrapper');
+            const startGameButton = document.getElementById('startGameButton');
+
+            let currentPlayerCount = 4; // デフォルトは4人
+
+            /**
+             * LocalStorageからプレイヤー人数とプレイヤー名をロードする
+             */
+            function loadSettings() {
+                // プレイヤー人数データのロード
+                const storedPlayerCount = localStorage.getItem(LOCAL_STORAGE_KEY_PLAYER_COUNT);
+                if (storedPlayerCount) {
+                    currentPlayerCount = parseInt(storedPlayerCount);
+                    playerCountRadios.forEach(radio => {
+                        if (parseInt(radio.value) === currentPlayerCount) {
+                            radio.checked = true;
+                        }
+                    });
+                } else {
+                    playerCountRadios[2].checked = true; // デフォルトで4人を選択
+                }
+
+                // プレイヤー名データのロード
+                const storedPlayerNames = localStorage.getItem(LOCAL_STORAGE_KEY_PLAYER_NAMES);
+                if (storedPlayerNames) {
+                    const loadedNames = JSON.parse(storedPlayerNames);
+                    loadedNames.forEach((name, index) => {
+                        if (playerInputs[index]) {
+                            playerInputs[index].value = name;
+                        }
+                    });
+                } else {
+                    // デフォルトのプレイヤー名を設定
+                    playerInputs.forEach((input, index) => {
+                        input.value = `プレイヤー${String.fromCharCode(65 + index)}`; // プレイヤーA, B, C, D
+                    });
+                }
+                updatePlayerInputVisibility(); // ロード後に表示を更新
+            }
+
+            /**
+             * プレイヤー人数とプレイヤー名をLocalStorageに保存する
+             */
+            function saveSettings() {
+                localStorage.setItem(LOCAL_STORAGE_KEY_PLAYER_COUNT, currentPlayerCount.toString());
+                const currentNames = playerInputs.map(input => input.value);
+                localStorage.setItem(LOCAL_STORAGE_KEY_PLAYER_NAMES, JSON.stringify(currentNames));
+            }
+
+            /**
+             * プレイヤー名入力欄の表示/非表示を切り替える
+             */
+            function updatePlayerInputVisibility() {
+                playerInputWrappers.forEach((wrapper, index) => {
+                    if (index < currentPlayerCount) {
+                        wrapper.style.display = 'flex'; // 表示
+                    } else {
+                        wrapper.style.display = 'none'; // 非表示
+                    }
+                });
+            }
+
+            // イベントリスナーの登録
+            playerCountRadios.forEach(radio => {
+                radio.addEventListener('change', (event) => {
+                    currentPlayerCount = parseInt(event.target.value);
+                    updatePlayerInputVisibility();
+                    saveSettings(); // 人数変更時に保存
+                });
+            });
+
+            playerInputs.forEach(input => {
+                input.addEventListener('input', saveSettings); // プレイヤー名変更時に保存
+            });
+
+            startGameButton.addEventListener('click', () => {
+                saveSettings(); // 最終確認として保存
+                window.location.href = './scoreboard.html'; // scoreboard.htmlへ遷移
+            });
+
+            // ページの初期ロード時に実行
+            loadSettings();
+        });
+    </script>
+</body>
+</html>
