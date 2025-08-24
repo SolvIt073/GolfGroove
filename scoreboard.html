@@ -48,5 +48,14 @@
 
     <!-- 動的マトリクス生成用script.jsの追加 -->
     <script src="script.js"></script>
+    <script>
+        // ページ読み込み時にグリッド生成
+        document.addEventListener('DOMContentLoaded', function() {
+            // プレイヤー表示や他の初期化もここで呼ぶ場合は追加
+            if (typeof generateScoreTable === 'function') {
+                generateScoreTable();
+            }
+        });
+    </script>
 </body>
 </html>
